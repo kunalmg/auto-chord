@@ -20,6 +20,25 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Deploy on Render
+
+This repo includes a `render.yaml` for one-click deployment (frontend + backend + Postgres).
+
+Steps:
+- Push the repository to GitHub.
+- In Render, choose New > Blueprint and select the repository.
+- Render will use the build and start commands from `render.yaml`.
+
+Local build commands (same as Render):
+
+```bash
+npm run build
+npm run start
+```
+
+The backend service connects to the Render Postgres instance via `DATABASE_URL`.
+The backend service in `render.yaml` currently runs a placeholder entrypoint.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
