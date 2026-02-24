@@ -1,10 +1,19 @@
 Directory purpose: backend API services for AutoChord.
 
-Suggested folders:
-- src/
-- configs/
-- routes/
-- services/
-- controllers/
+Local commands:
+- npm install
+- npm run dev
 
-Add your server framework and database client here.
+Migrations:
+- npm run migrate
+
+API endpoints:
+- GET /health
+- GET /api/status
+- GET /api/songs
+- GET /api/songs/:id
+- POST /api/songs
+
+POST /api/songs body:
+- title: string
+- artist: string
