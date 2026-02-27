@@ -1,4 +1,4 @@
-import pg, { QueryResult } from "pg";
+import pg, { QueryResult, QueryResultRow } from "pg";
 
 const { Pool } = pg as unknown as { Pool: typeof import("pg").Pool };
 
@@ -12,9 +12,12 @@ export function getPool() {
   return pool;
 }
 
-export async function query<T = unknown>(sql: string, params: readonly unknown[] = []): Promise<QueryResult<T>> {
+export async function query<T extends QueryResultRow = QueryResultRow>(
+  sql: string,
+  params: unknown[] = []
+): Promise<QueryResult<T>> {
   const p = getPool();
   if (!p) throw new Error("DATABASE_URL not set");
-  const res = await p.query<T>(sql, params as readonly unknown[]);
+  const res = await p.query<T>(sql, params as any[]);
   return res;
 }
