@@ -35,6 +35,46 @@ How to find your chat ID:
 
 API route: `app/api/contact/route.ts`
 
+## Admin Login & Panel
+
+Simple admin auth is included for a lightweight panel with content editing and sample analytics.
+
+Set these variables in `.env.local`:
+
+```
+ADMIN_USER=your_admin_username
+ADMIN_PASS=your_admin_password
+AUTH_SECRET=a_long_random_string
+DATABASE_URL=postgres://user:pass@host:port/dbname
+SMTP_HOST=smtp.yourprovider.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_password
+FROM_EMAIL=no-reply@yourdomain.com
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+Usage:
+- Start the app: `npm run dev`
+- Visit `/login`, sign in with your credentials
+- Admin panel: `/admin`
+- Content editor: `/admin/content`
+
+Notes:
+- The session cookie is HttpOnly and signed with `AUTH_SECRET`.
+- Metrics are demo-only; set `NEXT_PUBLIC_SITE_URL` to your site URL for server fetches in production, or it defaults to `http://localhost:3000` in development.
+
+## Database Migrations
+
+Run database migrations against `DATABASE_URL`:
+
+```
+npm run migrate
+```
+
+This applies all SQL files in `database/migrations` in order and tracks them in `schema_migrations`. It is safe to run multiple times.
+
 ## Deploy on Render
 
 This repo includes a `render.yaml` for one-click deployment (frontend + backend + Postgres).

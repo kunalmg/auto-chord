@@ -2,29 +2,30 @@ import Container from "@/components/Container";
 import GlassCard from "@/components/GlassCard";
 import SectionHeading from "@/components/SectionHeading";
 import SongSheetPreview from "@/components/SongSheetPreview";
+import { getSiteContent } from "@/lib/content";
 
-export default function Home() {
+export default async function Home() {
+  const content = await getSiteContent();
   return (
     <div>
       <section className="py-20 sm:py-28">
         <Container className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.3em] text-white/60">
-              Premium Music-Tech Engine
+              {content.siteTitle}
             </div>
             <h1 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">
-              Your Guitar. Your Key. Your Song — Instantly.
+              {content.heroTitle}
             </h1>
             <p className="text-lg text-white/70">
-              AUTOCHORD generates perfectly aligned chords + lyrics with clean
-              formatting and instant transposition.
+              {content.heroSubtitle}
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <a
                 href="/features"
                 className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-lime-300 via-cyan-300 to-white px-6 py-3 text-sm font-semibold text-black transition hover:shadow-[0_0_30px_rgba(76,231,255,0.5)]"
               >
-                Get Started
+                {content.ctaText}
               </a>
               <a
                 href="/features"
