@@ -18,6 +18,6 @@ export async function query<T extends QueryResultRow = QueryResultRow>(
 ): Promise<QueryResult<T>> {
   const p = getPool();
   if (!p) throw new Error("DATABASE_URL not set");
-  const res = await p.query<T>(sql, params as any[]);
+  const res = await p.query<T>(sql, params as unknown[]);
   return res;
 }

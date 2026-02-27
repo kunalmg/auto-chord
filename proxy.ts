@@ -17,12 +17,11 @@ function decodePayload(token: string | undefined): Payload {
   }
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const session = req.cookies.get("session")?.value;
   const payload = decodePayload(session);
 
-  // Protect /dashboard for any signed-in user
   if (pathname.startsWith("/dashboard")) {
     if (!payload) {
       const url = req.nextUrl.clone();
@@ -31,7 +30,6 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // Protect /admin* for admin role
   if (pathname.startsWith("/admin")) {
     if (!payload || payload.r !== "admin") {
       const url = req.nextUrl.clone();
@@ -46,3 +44,4 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: ["/admin/:path*", "/dashboard/:path*"],
 };
+

@@ -21,6 +21,24 @@ export const metadata: Metadata = {
   },
   description:
     "AutoChord is a premium music-tech platform that generates perfectly aligned chords and lyrics with instant transposition.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "AUTOCHORD — Intelligent Guitar Chords & Lyrics Engine",
+    description:
+      "Generate perfectly aligned chords + lyrics with instant key transpose and clean, performance‑ready formatting.",
+    url: "/",
+    siteName: "AutoChord",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AUTOCHORD — Intelligent Guitar Chords & Lyrics Engine",
+    description:
+      "Generate perfectly aligned chords + lyrics with instant key transpose and clean, performance‑ready formatting.",
+  },
 };
 
 export default function RootLayout({

@@ -33,7 +33,7 @@ export default function Navbar() {
           ))}
         </nav>
         <Link
-          href="/features"
+          href="/signup"
           className="inline-flex items-center justify-center rounded-full border border-cyan-300/30 bg-cyan-300/10 px-5 py-2 text-sm font-medium text-white transition hover:border-cyan-300/60 hover:bg-cyan-300/20"
         >
           Get Started
