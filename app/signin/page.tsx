@@ -28,6 +28,12 @@ export default function SigninPage() {
                 Forgot your password?
               </Link>
             </div>
+            <div className="mt-2 text-center text-xs text-white/70">
+              <span>Don&apos;t have an account? </span>
+              <Link href="/signup" className="underline">
+                Sign up
+              </Link>
+            </div>
           </GlassCard>
         </div>
       </Container>
