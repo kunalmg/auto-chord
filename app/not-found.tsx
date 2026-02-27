@@ -13,7 +13,7 @@ export default function NotFound() {
         </h1>
         <p className="mt-4 max-w-xl text-white/70">
           The page you requested couldn’t be found. Head back to the home
-          stage, or launch the demo to keep exploring.
+          stage, or explore the features to continue.
         </p>
         <div className="mt-8 flex flex-col gap-4 sm:flex-row">
           <Link
@@ -23,10 +23,10 @@ export default function NotFound() {
             Back to Home
           </Link>
           <Link
-            href="/demo"
+            href="/features"
             className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/20"
           >
-            Launch Demo
+            Explore Features
           </Link>
         </div>
       </Container>

@@ -21,10 +21,10 @@ export default function Home() {
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <a
-                href="/demo"
+                href="/features"
                 className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-lime-300 via-cyan-300 to-white px-6 py-3 text-sm font-semibold text-black transition hover:shadow-[0_0_30px_rgba(76,231,255,0.5)]"
               >
-                Try Demo
+                Get Started
               </a>
               <a
                 href="/features"
@@ -153,10 +153,10 @@ export default function Home() {
             </p>
             <div className="mt-6 flex flex-col justify-center gap-4 sm:flex-row">
               <a
-                href="/demo"
+                href="/features"
                 className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition hover:shadow-[0_0_25px_rgba(255,255,255,0.35)]"
               >
-                Try Demo
+                Get Started
               </a>
               <a
                 href="/features"

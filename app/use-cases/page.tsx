@@ -6,7 +6,7 @@ import SectionHeading from "@/components/SectionHeading";
 export const metadata: Metadata = {
   title: "Use Cases",
   description:
-    "Explore real scenarios where AutoChord supports musicians, teachers, and students.",
+    "Explore real scenarios where AutoChord supports musicians and educators.",
 };
 
 const stories = [
@@ -24,11 +24,6 @@ const stories = [
     title: "Teacher creating lesson material",
     story:
       "Professor Lane builds a lesson pack with consistent formatting. Students receive the same aligned sheets across their devices.",
-  },
-  {
-    title: "Students practicing efficiently",
-    story:
-      "A student band rehearses with phones and tablets. The responsive viewer keeps lyrics readable from a music stand.",
   },
 ];
 

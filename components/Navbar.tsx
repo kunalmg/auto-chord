@@ -4,8 +4,6 @@ import Container from "./Container";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/features", label: "Features" },
-  { href: "/demo", label: "Demo" },
-  { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -33,10 +31,10 @@ export default function Navbar() {
           ))}
         </nav>
         <Link
-          href="/demo"
+          href="/features"
           className="inline-flex items-center justify-center rounded-full border border-cyan-300/30 bg-cyan-300/10 px-5 py-2 text-sm font-medium text-white transition hover:border-cyan-300/60 hover:bg-cyan-300/20"
         >
-          Launch Demo
+          Get Started
         </Link>
       </Container>
     </header>
