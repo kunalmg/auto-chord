@@ -15,5 +15,18 @@ alter table if exists songs
   add column if not exists release_date date,
   add column if not exists updated_at timestamptz default now();
 
-create unique index if not exists songs_title_artist_uniq on songs (lower(title), coalesce(lower(artist), ''));
+-- Deduplicate existing rows by (lower(title), lower(coalesce(artist,''))) keeping the most recent
+with ranked as (
+  select id,
+         row_number() over (
+           partition by lower(title), coalesce(lower(artist),'')
+           order by coalesce(updated_at, created_at) desc, id desc
+         ) as rn
+  from songs
+)
+delete from songs s
+using ranked r
+where s.id = r.id
+  and r.rn > 1;
 
+create unique index if not exists songs_title_artist_uniq on songs (lower(title), coalesce(lower(artist), ''));
