@@ -10,13 +10,16 @@ export async function GET(_: NextRequest, ctx: { params: Promise<{ id: string }>
   if (!Number.isInteger(id)) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
   try {
     const res = await query(
-      "select * from songs where id = $1",
+      `select id, title, artist, key_scale as key, capo, difficulty, tempo, tuning, genre, tags,
+              description, strumming_pattern, chord_progression, body as sheet_body,
+              created_at, updated_at, owner_id
+         from songs where id = $1`,
       [id]
     );
-    if (!res.rows.length) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+    if (!res.rows.length) return NextResponse.json({ ok: false, error: "Sheet not found" }, { status: 404 });
     return NextResponse.json({ ok: true, data: res.rows[0] });
   } catch {
-    return NextResponse.json({ ok: false, error: "Database not configured" }, { status: 503 });
+    return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 });
   }
 }
 
@@ -31,7 +34,7 @@ export async function DELETE(_: NextRequest, ctx: { params: Promise<{ id: string
   try {
     const res = await query<{ owner_id: number }>("select owner_id from songs where id = $1", [id]);
     if (!res.rows.length) {
-      return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+      return NextResponse.json({ ok: false, error: "Sheet not found" }, { status: 404 });
     }
     const ownerId = res.rows[0].owner_id;
     if (payload.r === "admin" || (payload.id && payload.id === ownerId)) {
@@ -40,7 +43,7 @@ export async function DELETE(_: NextRequest, ctx: { params: Promise<{ id: string
     }
     return NextResponse.json({ ok: false, error: "You can only delete your own sheet." }, { status: 403 });
   } catch {
-    return NextResponse.json({ ok: false, error: "Database not configured" }, { status: 503 });
+    return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 });
   }
 }
 

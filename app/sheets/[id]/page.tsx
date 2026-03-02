@@ -11,11 +11,15 @@ export const metadata: Metadata = {
 };
 
 async function getSheet(id: string) {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const base =
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "http://localhost:3000";
   const res = await fetch(`${base}/api/songs/${id}`, { cache: "no-store" });
   if (!res.ok) return null;
   const data = await res.json().catch(() => null);
-  return data?.ok ? data.data : null;
+  if (!data || data.ok !== true || !data.data) return null;
+  return data.data;
 }
 
 function Pill({ children }: { children: React.ReactNode }) {
@@ -48,7 +52,7 @@ export default async function SheetPage({ params }: { params: { id: string } }) 
         <div className="mt-10 grid gap-6 lg:grid-cols-3">
           <GlassCard className="lg:col-span-2">
             <div className="flex flex-wrap">
-              <Pill>Key: {item.key_scale ?? "—"}</Pill>
+              <Pill>Key: {item.key ?? item.key_scale ?? "—"}</Pill>
               <Pill>Capo: {item.capo ?? "—"}</Pill>
               <Pill>Difficulty: {item.difficulty ?? "—"}</Pill>
               <Pill>Tuning: {item.tuning ?? "—"}</Pill>
@@ -69,7 +73,7 @@ export default async function SheetPage({ params }: { params: { id: string } }) 
             <div className="mt-6 rounded-xl border border-white/10 bg-black/40 p-4">
               <h3 className="text-sm font-semibold text-white">Chord Sheet</h3>
               <pre className="mt-3 whitespace-pre-wrap font-mono text-sm leading-6 text-white/90">
-                {item.formatted || item.body || "No sheet added yet."}
+                {item.sheet_body || item.formatted || item.body || "No sheet added yet."}
               </pre>
             </div>
             {(item.youtube_link || item.reference_link) ? (
