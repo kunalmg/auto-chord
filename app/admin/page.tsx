@@ -60,6 +60,12 @@ export default async function AdminPage() {
               >
                 Edit Content
               </Link>
+              <Link
+                href="/admin/users"
+                className="ml-3 rounded-full border border-white/20 bg-white/10 px-6 py-2 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/20"
+              >
+                Manage Users
+              </Link>
             </div>
             <form className="mt-6" action="/api/auth/logout" method="post">
               <button
