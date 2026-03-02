@@ -12,6 +12,7 @@ type Item = {
   key_scale?: string | null;
   difficulty?: string | null;
   genre?: string | null;
+  owner_id?: number;
 };
 
 export default function SheetsBrowser() {
@@ -23,12 +24,21 @@ export default function SheetsBrowser() {
   const [genre, setGenre] = useState("");
   const [deleting, setDeleting] = useState<number | null>(null);
 
+  const [me, setMe] = useState<{ id: number; role: string } | null>(null);
+  const [adminAll, setAdminAll] = useState(false);
   useEffect(() => {
-    fetch("/api/songs", { cache: "no-store" })
+    fetch("/api/user/me")
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => setMe({ id: d.data.id, role: d.data.role }))
+      .catch(() => setMe(null));
+  }, []);
+  useEffect(() => {
+    const q = me?.role === "admin" && adminAll ? "?all=1" : "";
+    fetch(`/api/songs${q}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => setItems(d.ok ? d.data : []))
       .catch(() => setItems([]));
-  }, []);
+  }, [me?.role, adminAll]);
 
   const filtered = useMemo(() => {
     const list = (items ?? []).filter((it) => {
@@ -57,13 +67,30 @@ export default function SheetsBrowser() {
 
   if (!items) {
     return (
-      <div className="grid gap-6 md:grid-cols-2">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-28 animate-pulse rounded-2xl border border-white/10 bg-white/5"
-          />
-        ))}
+      <div>
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-white/60">
+            {me?.role === "admin" && (
+              <label className="inline-flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  className="accent-cyan-300"
+                  checked={adminAll}
+                  onChange={(e) => setAdminAll(e.target.checked)}
+                />
+                <span>All Sheets (Admin)</span>
+              </label>
+            )}
+          </div>
+        </div>
+        <div className="mt-4 grid gap-6 md:grid-cols-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-28 animate-pulse rounded-2xl border border-white/10 bg-white/5"
+            />
+          ))}
+        </div>
       </div>
     );
   }
@@ -156,13 +183,15 @@ export default function SheetsBrowser() {
               >
                 View
               </Link>
-              <button
-                onClick={() => remove(item.id)}
-                disabled={deleting === item.id}
-                className="ml-2 rounded-full border border-red-400/30 px-3 py-1 text-xs text-red-200 disabled:opacity-60"
-              >
-                {deleting === item.id ? "Deleting…" : "Delete"}
-              </button>
+              {(me && (me.role === "admin" || me.id === item.owner_id)) ? (
+                <button
+                  onClick={() => remove(item.id)}
+                  disabled={deleting === item.id}
+                  className="ml-2 rounded-full border border-red-400/30 px-3 py-1 text-xs text-red-200 disabled:opacity-60"
+                >
+                  {deleting === item.id ? "Deleting…" : "Delete"}
+                </button>
+              ) : null}
             </div>
           </div>
         ))}
@@ -173,4 +202,3 @@ export default function SheetsBrowser() {
     </div>
   );
 }
-

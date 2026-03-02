@@ -10,8 +10,8 @@ export async function GET() {
   if (!payload || !payload.id) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
-  const res = await query<{ id: number; email: string; username: string }>(
-    "select id, email, username from users where id = $1",
+  const res = await query<{ id: number; email: string; username: string; role: string }>(
+    "select id, email, username, role from users where id = $1",
     [payload.id]
   );
   if (!res.rows.length) {
@@ -19,4 +19,3 @@ export async function GET() {
   }
   return NextResponse.json({ ok: true, data: res.rows[0] });
 }
-

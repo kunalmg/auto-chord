@@ -3,8 +3,16 @@ import { query } from "@/lib/db";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const url = new URL(req.url);
+    const all = url.searchParams.get("all") === "1";
+    const jar = await cookies();
+    const token = jar.get("session")?.value;
+    const payload = verifyToken(token);
+    const isAdmin = !!payload && payload.r === "admin";
+    const where = !isAdmin || !all ? "where owner_id = $1" : "";
+    const params: unknown[] = !isAdmin || !all ? [payload?.id ?? -1] : [];
     const res = await query<{
       id: number;
       title: string;
@@ -15,8 +23,13 @@ export async function GET() {
       key_scale: string | null;
       difficulty: string | null;
       genre: string | null;
+      owner_id: number;
     }>(
-      "select id, title, artist, body, created_at, updated_at, key_scale, difficulty, genre from songs order by coalesce(updated_at, created_at) desc"
+      `select id, title, artist, body, created_at, updated_at, key_scale, difficulty, genre, owner_id
+       from songs
+       ${where}
+       order by coalesce(updated_at, created_at) desc`,
+      params
     );
     return NextResponse.json({ ok: true, data: res.rows });
   } catch {
@@ -55,8 +68,8 @@ export async function POST(req: Request) {
   if (!title) return NextResponse.json({ ok: false, error: "Title is required" }, { status: 400 });
   try {
     const exists = await query<{ id: number }>(
-      "select id from songs where lower(title) = lower($1) and coalesce(lower(artist),'') = coalesce(lower($2),'')",
-      [title, artist]
+      "select id from songs where lower(title) = lower($1) and coalesce(lower(artist),'') = coalesce(lower($2),'') and owner_id = $3",
+      [title, artist, payload.id ?? -1]
     );
     if (exists.rows.length) {
       return NextResponse.json({ ok: false, error: "Sheet already exists" }, { status: 409 });
@@ -68,8 +81,8 @@ export async function POST(req: Request) {
       body: string | null;
       created_at: string;
     }>(
-      `insert into songs (title, artist, body, key_scale, capo, difficulty, tempo, strumming_pattern, tuning, genre, tags, description, chord_progression, youtube_link, reference_link, formatted, release_date, updated_at)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17, now())
+      `insert into songs (title, artist, body, key_scale, capo, difficulty, tempo, strumming_pattern, tuning, genre, tags, description, chord_progression, youtube_link, reference_link, formatted, release_date, updated_at, owner_id)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17, now(), $18)
        returning id, title, artist, body, created_at`,
       [
         title,
@@ -89,6 +102,7 @@ export async function POST(req: Request) {
         fields.reference_link,
         fields.formatted,
         fields.release_date,
+        payload.id ?? null,
       ]
     );
     return NextResponse.json({ ok: true, data: res.rows[0] }, { status: 201 });

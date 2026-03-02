@@ -29,8 +29,16 @@ export async function DELETE(_: NextRequest, ctx: { params: Promise<{ id: string
   const id = Number(idStr);
   if (!Number.isInteger(id)) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
   try {
-    await query("delete from songs where id = $1", [id]);
-    return NextResponse.json({ ok: true });
+    const res = await query<{ owner_id: number }>("select owner_id from songs where id = $1", [id]);
+    if (!res.rows.length) {
+      return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+    }
+    const ownerId = res.rows[0].owner_id;
+    if (payload.r === "admin" || (payload.id && payload.id === ownerId)) {
+      await query("delete from songs where id = $1", [id]);
+      return NextResponse.json({ ok: true });
+    }
+    return NextResponse.json({ ok: false, error: "You can only delete your own sheet." }, { status: 403 });
   } catch {
     return NextResponse.json({ ok: false, error: "Database not configured" }, { status: 503 });
   }
@@ -77,4 +85,3 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     return NextResponse.json({ ok: false, error: "Database not configured" }, { status: 503 });
   }
 }
-

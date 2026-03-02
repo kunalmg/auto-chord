@@ -13,8 +13,8 @@ export async function POST(req: Request) {
     if (!email || !password) {
       return NextResponse.json({ ok: false, error: "Missing fields" }, { status: 400 });
     }
-    const res = await query<{ id: number; email: string; username: string; password_hash: string }>(
-      "select id, email, username, password_hash from users where email = $1",
+    const res = await query<{ id: number; email: string; username: string; password_hash: string; role: string }>(
+      "select id, email, username, password_hash, role from users where email = $1",
       [email]
     );
     if (res.rows.length === 0) {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     if (!ok) {
       return NextResponse.json({ ok: false, error: "Invalid credentials" }, { status: 401 });
     }
-    const token = signToken(row.username, "user", { id: row.id, e: row.email });
+    const token = signToken(row.username, row.role || "user", { id: row.id, e: row.email });
     if (!token) {
       return NextResponse.json({ ok: false, error: "Server not configured" }, { status: 500 });
     }
