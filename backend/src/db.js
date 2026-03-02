@@ -3,9 +3,14 @@ import pg from "pg";
 const { Pool } = pg;
 const connectionString = process.env.DATABASE_URL;
 
+const useSsl =
+  String(process.env.PGSSL || "").toLowerCase() === "true" ||
+  !!process.env.RENDER ||
+  process.env.NODE_ENV === "production";
 const pool = connectionString
   ? new Pool({
       connectionString,
+      ssl: useSsl ? { rejectUnauthorized: false } : undefined,
     })
   : null;
 

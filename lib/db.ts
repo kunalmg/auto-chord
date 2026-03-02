@@ -8,7 +8,14 @@ export function getPool() {
   if (pool) return pool;
   const url = process.env.DATABASE_URL;
   if (!url) return null;
-  pool = new Pool({ connectionString: url });
+  const useSsl =
+    String(process.env.PGSSL || "").toLowerCase() === "true" ||
+    !!process.env.RENDER ||
+    process.env.NODE_ENV === "production";
+  pool = new Pool({
+    connectionString: url,
+    ssl: useSsl ? { rejectUnauthorized: false } : undefined,
+  });
   return pool;
 }
 
