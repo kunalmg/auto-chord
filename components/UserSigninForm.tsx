@@ -24,14 +24,19 @@ export default function UserSigninForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        setError(data.error || "Login failed");
+      let data: { ok?: boolean; error?: string } | null = null;
+      try {
+        data = await res.json();
+      } catch {
+        // ignore parse error
+      }
+      if (!res.ok || !data?.ok) {
+        setError((data && data.error) || "Something went wrong. Please try again.");
       } else {
-        router.push("/dashboard");
+        router.push("/sheets");
       }
     } catch {
-      setError("Network error");
+      setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -74,4 +79,3 @@ export default function UserSigninForm() {
     </form>
   );
 }
-
