@@ -10,6 +10,11 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+// Alias for consistency with other services
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 app.get("/api/status", async (req, res) => {
   if (!pool) {
     res.json({ status: "ok", database: "not_configured" });
