@@ -3,8 +3,8 @@ export async function apiFetch<T>(
   options?: RequestInit
 ): Promise<{ ok: boolean; data?: T; error?: string }> {
   const base =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
     process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
     "http://localhost:4000";
   const res = await fetch(`${base}${path}`, {
     ...options,
