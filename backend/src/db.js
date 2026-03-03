@@ -7,12 +7,14 @@ const useSsl =
   String(process.env.PGSSL || "").toLowerCase() === "true" ||
   !!process.env.RENDER ||
   process.env.NODE_ENV === "production";
-const pool = connectionString
-  ? new Pool({
-      connectionString,
-      ssl: useSsl ? { rejectUnauthorized: false } : undefined,
-    })
-  : null;
+if (!connectionString) {
+  console.error("DATABASE_URL not set");
+  process.exit(1);
+}
+const pool = new Pool({
+  connectionString,
+  ssl: useSsl ? { rejectUnauthorized: false } : undefined,
+});
 
 if (pool) {
   pool
@@ -22,11 +24,10 @@ if (pool) {
       console.log("Database connected");
     })
     .catch((error) => {
-      console.log("Database connection failed");
+      console.error("Database connection failed");
       console.error(error);
+      process.exit(1);
     });
-} else {
-  console.log("DATABASE_URL not set");
 }
 
 export { pool };

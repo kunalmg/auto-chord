@@ -28,6 +28,7 @@ app.use((req, res, next) => {
 
 // Auth token helpers (HMAC-based)
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
 function base64url(input) {
   return Buffer.from(input)
     .toString("base64")
@@ -51,19 +52,22 @@ function signToken(username, role = "user", extra = {}) {
 }
 async function verifyPassword(password, encoded) {
   try {
-    const [scheme, Ns, rs, ps, saltHex, hashHex] = String(encoded).split(":");
-    if (scheme !== "scrypt") return false;
-    const N = Number(Ns), r = Number(rs), p = Number(ps);
-    const salt = Buffer.from(saltHex, "hex");
-    const expected = Buffer.from(hashHex, "hex");
-    const keylen = expected.length;
-    const derived = await new Promise((resolve, reject) => {
-      crypto.scrypt(password, salt, keylen, { N, r, p }, (err, buf) => {
-        if (err) reject(err);
-        else resolve(buf);
+    if (String(encoded).startsWith("scrypt:")) {
+      const [scheme, Ns, rs, ps, saltHex, hashHex] = String(encoded).split(":");
+      if (scheme !== "scrypt") return false;
+      const N = Number(Ns), r = Number(rs), p = Number(ps);
+      const salt = Buffer.from(saltHex, "hex");
+      const expected = Buffer.from(hashHex, "hex");
+      const keylen = expected.length;
+      const derived = await new Promise((resolve, reject) => {
+        crypto.scrypt(password, salt, keylen, { N, r, p }, (err, buf) => {
+          if (err) reject(err);
+          else resolve(buf);
+        });
       });
-    });
-    return crypto.timingSafeEqual(derived, expected);
+      return crypto.timingSafeEqual(derived, expected);
+    }
+    return await bcrypt.compare(password, encoded);
   } catch {
     return false;
   }
@@ -375,16 +379,7 @@ app.post("/api/auth/signup", async (req, res) => {
       res.status(409).json({ ok: false, error: "Email already registered" });
       return;
     }
-    // scrypt hashing (consistent with existing project)
-    const salt = crypto.randomBytes(16);
-    const N = 16384, r = 8, p = 1, keylen = 64;
-    const derived = await new Promise((resolve, reject) => {
-      crypto.scrypt(password, salt, keylen, { N, r, p }, (err, buf) => {
-        if (err) reject(err);
-        else resolve(buf);
-      });
-    });
-    const password_hash = `scrypt:${N}:${r}:${p}:${salt.toString("hex")}:${Buffer.from(derived).toString("hex")}`;
+    const password_hash = await bcrypt.hash(password, 12);
     await pool.query(
       `create table if not exists users (
         id serial primary key,
@@ -414,6 +409,7 @@ app.post("/api/auth/signup", async (req, res) => {
 app.listen(port, () => {
   console.log(`AutoChord backend running on ${port}`);
   if (!process.env.AUTH_SECRET) {
-    console.log("AUTH_SECRET not set");
+    console.error("AUTH_SECRET not set");
+    process.exit(1);
   }
 });

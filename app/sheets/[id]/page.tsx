@@ -3,6 +3,7 @@ import Container from "@/components/Container";
 import GlassCard from "@/components/GlassCard";
 import SectionHeading from "@/components/SectionHeading";
 import { CHORDS, detectChords } from "@/lib/chords";
+import { apiFetch } from "@/lib/api";
 import ChordDiagram from "@/components/ChordDiagram";
 
 export const metadata: Metadata = {
@@ -10,16 +11,36 @@ export const metadata: Metadata = {
   description: "Song sheet details",
 };
 
+type Sheet = {
+  id: number;
+  title: string;
+  artist: string | null;
+  key?: string | null;
+  key_scale?: string | null;
+  capo?: number | null;
+  difficulty?: string | null;
+  tempo?: number | null;
+  tuning?: string | null;
+  genre?: string | null;
+  tags?: string[] | null;
+  description?: string | null;
+  strumming_pattern?: string | null;
+  chord_progression?: string | null;
+  body?: string | null;
+  formatted?: string | null;
+  sheet_body?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  owner_id?: number | null;
+  youtube_link?: string | null;
+  reference_link?: string | null;
+  release_date?: string | null;
+};
+
 async function getSheet(id: string) {
-  const base =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "http://localhost:3000";
-  const res = await fetch(`${base}/api/songs/${id}`, { cache: "no-store" });
-  if (!res.ok) return null;
-  const data = await res.json().catch(() => null);
-  if (!data || data.ok !== true || !data.data) return null;
-  return data.data;
+  const result = await apiFetch<Sheet>(`/api/songs/${id}`, { cache: "no-store" } as RequestInit);
+  if (!result.ok) return null;
+  return result.data;
 }
 
 function Pill({ children }: { children: React.ReactNode }) {
@@ -36,7 +57,7 @@ export default async function SheetPage({ params }: { params: { id: string } }) 
     return (
       <section className="py-20">
         <Container>
-          <p className="text-white/70">Not found</p>
+          <p className="text-white/70">Sheet not found</p>
         </Container>
       </section>
     );
