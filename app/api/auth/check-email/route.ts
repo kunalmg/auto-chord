@@ -13,7 +13,7 @@ export async function GET(req: Request) {
       [email]
     );
     const exists = res.rows[0]?.exists === true;
-    return NextResponse.json({ ok: true, available: !exists });
+    return NextResponse.json({ ok: true, data: { available: !exists } });
   } catch {
     return NextResponse.json({ ok: false, error: "Database not configured" }, { status: 503 });
   }

@@ -15,14 +15,36 @@ export async function POST(req: Request) {
     if (!email || !password) {
       return NextResponse.json({ ok: false, error: "Email and password are required" }, { status: 400 });
     }
-    const res = await query<{ id: number; email: string; username: string; password_hash: string; role: string }>(
-      "select id, email, username, password_hash, role from users where email = $1",
-      [email]
-    );
-    if (res.rows.length === 0) {
+    let row: { id: number; email: string; username: string; password_hash: string; role: string } | null = null;
+    try {
+      const res = await query<{ id: number; email: string; username: string; password_hash: string; role: string }>(
+        "select id, email, username, password_hash, role from users where email = $1",
+        [email]
+      );
+      row = res.rows[0] ?? null;
+    } catch (err) {
+      const msg = (err as Error).message || "";
+      if (msg.includes('column "role"') || msg.includes("column role")) {
+        const res2 = await query<{ id: number; email: string; username: string; password_hash: string }>(
+          "select id, email, username, password_hash from users where email = $1",
+          [email]
+        );
+        if (res2.rows[0]) {
+          row = { ...res2.rows[0], role: "user" } as unknown as {
+            id: number;
+            email: string;
+            username: string;
+            password_hash: string;
+            role: string;
+          };
+        }
+      } else {
+        throw err;
+      }
+    }
+    if (!row) {
       return NextResponse.json({ ok: false, error: "Invalid email or password" }, { status: 401 });
     }
-    const row = res.rows[0];
     const ok = await verifyPassword(password, row.password_hash);
     if (!ok) {
       return NextResponse.json({ ok: false, error: "Invalid email or password" }, { status: 401 });
@@ -46,6 +68,9 @@ export async function POST(req: Request) {
     const msg = (e as Error).message || "";
     if (msg.includes("DATABASE_URL")) {
       return NextResponse.json({ ok: false, error: "Database not configured" }, { status: 503 });
+    }
+    if (msg.includes('column "role"') || msg.includes("column role")) {
+      return NextResponse.json({ ok: false, error: "Server configuration error" }, { status: 500 });
     }
     return NextResponse.json({ ok: false, error: "Internal server error" }, { status: 500 });
   }

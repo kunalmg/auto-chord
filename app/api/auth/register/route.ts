@@ -40,6 +40,6 @@ export async function POST(req: Request) {
     if (msg.includes("duplicate key")) {
       return NextResponse.json({ ok: false, error: "Email already registered" }, { status: 409 });
     }
-    return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Internal server error" }, { status: 500 });
   }
 }

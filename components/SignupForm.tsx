@@ -26,8 +26,8 @@ export default function SignupForm() {
       try {
         const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`);
         const data = await res.json();
-        if (res.ok && data.ok) {
-          setEmailStatus(data.available ? "available" : "taken");
+        if (res.ok && data.ok && data.data) {
+          setEmailStatus(data.data.available ? "available" : "taken");
         } else {
           setEmailStatus("idle");
         }

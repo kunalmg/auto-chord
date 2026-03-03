@@ -19,10 +19,15 @@ export default function UserSigninForm() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/auth/user-login", {
+      const base =
+        process.env.NEXT_PUBLIC_BACKEND_URL ||
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        "http://localhost:3000";
+      const res = await fetch(`${base}/api/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
       let data: { ok?: boolean; error?: string } | null = null;
       try {
