@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 
 export default function SignupForm() {
   const router = useRouter();
@@ -50,14 +51,15 @@ export default function SignupForm() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, password }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        setMsg(data.error || "Registration failed");
+      const result = await apiFetch<{ user: { id: number; email: string; name: string; role: string } }>(
+        "/api/auth/signup",
+        {
+          method: "POST",
+          body: JSON.stringify({ name: username, email, password }),
+        }
+      );
+      if (!result.ok) {
+        setMsg(result.error || "Registration failed");
       } else {
         setMsg("Account created. Please sign in.");
         setTimeout(() => router.push("/signin"), 800);

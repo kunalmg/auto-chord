@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { apiFetch } from "@/lib/api";
 
 type Item = {
   id: number;
@@ -34,9 +35,8 @@ export default function SheetsBrowser() {
   }, []);
   useEffect(() => {
     const q = me?.role === "admin" && adminAll ? "?all=1" : "";
-    fetch(`/api/songs${q}`, { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => setItems(d.ok ? d.data : []))
+    apiFetch<Item[]>(`/api/songs${q}`)
+      .then((result) => setItems(result.ok ? (result.data ?? []) : []))
       .catch(() => setItems([]));
   }, [me?.role, adminAll]);
 
@@ -58,10 +58,8 @@ export default function SheetsBrowser() {
   async function remove(id: number) {
     if (!confirm("Delete this sheet?")) return;
     setDeleting(id);
-    const res = await fetch(`/api/songs/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      setItems((arr) => (arr ?? []).filter((x) => x.id !== id));
-    }
+    const result = await apiFetch<{ id: number }>(`/api/songs/${id}`, { method: "DELETE" });
+    if (result.ok) setItems((arr) => (arr ?? []).filter((x) => x.id !== id));
     setDeleting(null);
   }
 

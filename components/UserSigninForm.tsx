@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 
 export default function UserSigninForm() {
   const router = useRouter();
@@ -19,24 +20,15 @@ export default function UserSigninForm() {
     }
     setSubmitting(true);
     try {
-      const base =
-        process.env.NEXT_PUBLIC_BACKEND_URL ||
-        process.env.NEXT_PUBLIC_SITE_URL ||
-        "http://localhost:3000";
-      const res = await fetch(`${base}/api/auth/signin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-      let data: { ok?: boolean; error?: string } | null = null;
-      try {
-        data = await res.json();
-      } catch {
-        // ignore parse error
-      }
-      if (!res.ok || !data?.ok) {
-        setError((data && data.error) || "Something went wrong. Please try again.");
+      const result = await apiFetch<{ user: { id: number; email: string; name: string; role: string } }>(
+        "/api/auth/signin",
+        {
+          method: "POST",
+          body: JSON.stringify({ email, password }),
+        }
+      );
+      if (!result.ok) {
+        setError(result.error ?? "Something went wrong. Please try again.");
       } else {
         router.push("/sheets");
       }
