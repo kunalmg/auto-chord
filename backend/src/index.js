@@ -8,11 +8,12 @@ app.use(express.json());
 
 // Minimal CORS for cross-origin frontend
 app.use((req, res, next) => {
-  const origin =
-    process.env.CORS_ORIGIN ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "*";
-  res.header("Access-Control-Allow-Origin", origin);
+  const envOrigin = process.env.CORS_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL;
+  const origin = envOrigin || req.headers.origin || "";
+  if (origin) {
+    res.header("Access-Control-Allow-Origin", origin);
+    res.header("Vary", "Origin");
+  }
   res.header("Access-Control-Allow-Credentials", "true");
   res.header(
     "Access-Control-Allow-Headers",
