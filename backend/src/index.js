@@ -339,7 +339,7 @@ app.post("/api/auth/signin", async (req, res) => {
     }
     res.cookie("session", token, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "none",
       secure: process.env.NODE_ENV === "production",
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
@@ -402,6 +402,30 @@ app.post("/api/auth/signup", async (req, res) => {
       res.status(503).json({ ok: false, error: "Database not configured" });
       return;
     }
+    res.status(500).json({ ok: false, error: "Internal server error" });
+  }
+});
+
+app.get("/api/user/me", async (req, res) => {
+  try {
+    const session = getCookie(req, "session");
+    const payload = verifyToken(session);
+    if (!payload || !payload.id) {
+      res.status(401).json({ ok: false, error: "Unauthorized" });
+      return;
+    }
+    if (!pool) {
+      res.status(503).json({ ok: false, error: "Database not configured" });
+      return;
+    }
+    const result = await pool.query("select id, email, username, coalesce(role,'user') as role from users where id = $1", [payload.id]);
+    if (!result.rows.length) {
+      res.status(404).json({ ok: false, error: "Not found" });
+      return;
+    }
+    res.json({ ok: true, data: result.rows[0] });
+  } catch (e) {
+    console.error(e);
     res.status(500).json({ ok: false, error: "Internal server error" });
   }
 });

@@ -28,9 +28,11 @@ export default function SheetsBrowser() {
   const [me, setMe] = useState<{ id: number; role: string } | null>(null);
   const [adminAll, setAdminAll] = useState(false);
   useEffect(() => {
-    fetch("/api/user/me")
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => setMe({ id: d.data.id, role: d.data.role }))
+    apiFetch<{ id: number; email: string; username: string; role: string }>("/api/user/me")
+      .then((res) => {
+        if (res.ok && res.data) setMe({ id: res.data.id, role: res.data.role });
+        else setMe(null);
+      })
       .catch(() => setMe(null));
   }, []);
   useEffect(() => {

@@ -2,10 +2,10 @@ export async function apiFetch<T>(
   path: string,
   options?: RequestInit
 ): Promise<{ ok: boolean; data?: T; error?: string }> {
-  const base =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    "";
+  const base = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+  if (!base) {
+    return { ok: false, error: "Server configuration error" };
+  }
   const res = await fetch(`${base}${path}`, {
     ...options,
     headers: {
