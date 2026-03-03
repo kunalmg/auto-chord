@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 
 export default function SongForm() {
   const router = useRouter();
@@ -33,9 +34,8 @@ export default function SongForm() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/songs", {
+      const result = await apiFetch<{ id: number }>("/api/songs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           artist: artist || null,
@@ -56,9 +56,8 @@ export default function SongForm() {
           release_date: releaseDate || null,
         }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        setMsg(data.error || "Failed to save");
+      if (!result.ok) {
+        setMsg(result.error || "Failed to save");
       } else {
         router.push("/sheets");
       }
