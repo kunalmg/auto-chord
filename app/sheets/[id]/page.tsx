@@ -38,7 +38,10 @@ type Sheet = {
 };
 
 async function getSheet(id: string) {
-  const base = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  const base =
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://autochord-backend.onrender.com";
   if (base) {
     try {
       const res = await fetch(`${base}/api/songs/${id}`, { cache: "no-store" });
