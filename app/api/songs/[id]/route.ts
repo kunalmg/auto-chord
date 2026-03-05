@@ -6,6 +6,17 @@ import { query } from "@/lib/db";
 
 export async function GET(_: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id: idStr } = await ctx.params;
+  const backend = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (backend) {
+    const url = `${backend}/api/songs/${idStr}`;
+    try {
+      const res = await fetch(url, { headers: { "Content-Type": "application/json" }, credentials: "include" as RequestCredentials });
+      const data = await res.json().catch(() => ({ ok: false, error: "Unexpected server response" }));
+      return NextResponse.json(data, { status: res.status });
+    } catch {
+      return NextResponse.json({ ok: false, error: "Unexpected server error" }, { status: 502 });
+    }
+  }
   const id = Number(idStr);
   if (!Number.isInteger(id)) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
   try {
@@ -24,11 +35,31 @@ export async function GET(_: NextRequest, ctx: { params: Promise<{ id: string }>
 }
 
 export async function DELETE(_: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const backend = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  const { id: idStr } = await ctx.params;
+  if (backend) {
+    const jar = await cookies();
+    const session = jar.get("session")?.value || "";
+    const url = `${backend}/api/songs/${idStr}`;
+    try {
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: session ? `session=${session}` : "",
+        },
+        credentials: "include" as RequestCredentials,
+      });
+      const data = await res.json().catch(() => ({ ok: false, error: "Unexpected server response" }));
+      return NextResponse.json(data, { status: res.status });
+    } catch {
+      return NextResponse.json({ ok: false, error: "Unexpected server error" }, { status: 502 });
+    }
+  }
   const jar = await cookies();
   const token = jar.get("session")?.value;
   const payload = verifyToken(token);
   if (!payload) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  const { id: idStr } = await ctx.params;
   const id = Number(idStr);
   if (!Number.isInteger(id)) return NextResponse.json({ ok: false, error: "Invalid id" }, { status: 400 });
   try {

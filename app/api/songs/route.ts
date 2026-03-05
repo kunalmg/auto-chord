@@ -4,6 +4,21 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 
 export async function GET(req: Request) {
+  const backend = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (backend) {
+    try {
+      const u = new URL(req.url);
+      const target = `${backend}/api/songs${u.search}`;
+      const res = await fetch(target, {
+        headers: { "Content-Type": "application/json" },
+        credentials: "include" as RequestCredentials,
+      });
+      const data = await res.json().catch(() => ({ ok: false, error: "Unexpected server response" }));
+      return NextResponse.json(data, { status: res.status });
+    } catch {
+      return NextResponse.json({ ok: false, error: "Unexpected server error" }, { status: 502 });
+    }
+  }
   try {
     const url = new URL(req.url);
     const all = url.searchParams.get("all") === "1";
@@ -38,6 +53,27 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const backend = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (backend) {
+    try {
+      const jar = await cookies();
+      const session = jar.get("session")?.value || "";
+      const bodyText = await req.text();
+      const res = await fetch(`${backend}/api/songs`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: session ? `session=${session}` : "",
+        },
+        body: bodyText,
+        credentials: "include" as RequestCredentials,
+      });
+      const data = await res.json().catch(() => ({ ok: false, error: "Unexpected server response" }));
+      return NextResponse.json(data, { status: res.status });
+    } catch {
+      return NextResponse.json({ ok: false, error: "Unexpected server error" }, { status: 502 });
+    }
+  }
   const jar = await cookies();
   const token = jar.get("session")?.value;
   const payload = verifyToken(token);
