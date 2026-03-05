@@ -6,6 +6,9 @@ services:
     buildCommand: npm install && npm run build
     startCommand: npm run start
     autoDeploy: true
+    envVars:
+      - key: NEXT_PUBLIC_BACKEND_URL
+        value: https://autochord-backend.onrender.com
   - type: web
     name: autochord-backend
     env: node
