@@ -6,7 +6,6 @@ import { CHORDS, detectChords } from "@/lib/chords";
 import { apiFetch } from "@/lib/api";
 import ChordDiagram from "@/components/ChordDiagram";
 import { sanitizeId } from "@/lib/sanitize-id.mjs";
-import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sheet",
@@ -70,12 +69,16 @@ function Pill({ children }: { children: React.ReactNode }) {
 export default async function SheetPage({ params }: { params: { id: string } }) {
   const raw = params.id;
   const idNum = sanitizeId(raw);
-  if (process.env.NODE_ENV !== "production") {
-    // minimal diagnostics
-    console.log("[sheet] raw id:", raw, "sanitized:", idNum);
-  }
+  // Temporary: always log to help diagnose in production
+  console.log("[sheet] raw id:", raw, "sanitized:", idNum);
   if (idNum == null) {
-    notFound();
+    return (
+      <section className="py-20">
+        <Container>
+          <p className="text-white/70">Invalid sheet id</p>
+        </Container>
+      </section>
+    );
   }
   const res = await getSheet(String(idNum));
   if (!res.ok || !res.data) {
