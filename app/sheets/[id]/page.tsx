@@ -39,8 +39,7 @@ type Sheet = {
 
 async function getSheet(id: string) {
   const result = await apiFetch<Sheet>(`/api/songs/${id}`, { cache: "no-store" } as RequestInit);
-  if (!result.ok) return null;
-  return result.data;
+  return result;
 }
 
 function Pill({ children }: { children: React.ReactNode }) {
@@ -52,16 +51,17 @@ function Pill({ children }: { children: React.ReactNode }) {
 }
 
 export default async function SheetPage({ params }: { params: { id: string } }) {
-  const item = await getSheet(params.id);
-  if (!item) {
+  const res = await getSheet(params.id);
+  if (!res.ok || !res.data) {
     return (
       <section className="py-20">
         <Container>
-          <p className="text-white/70">Sheet not found</p>
+          <p className="text-white/70">{res.error ?? "Unable to load sheet"}</p>
         </Container>
       </section>
     );
   }
+  const item = res.data;
   return (
     <section className="py-20">
       <Container>
