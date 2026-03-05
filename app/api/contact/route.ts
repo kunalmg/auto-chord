@@ -49,11 +49,19 @@ export async function POST(req: Request) {
     );
 
     if (!res.ok) {
-      const err = await res.text().catch(() => "Telegram API error");
-      return NextResponse.json(
-        { ok: false, error: err || "Telegram API error" },
-        { status: 502 }
-      );
+      let msg = "Messaging service error";
+      try {
+        const j = (await res.json()) as { description?: string; error_code?: number } | null;
+        const desc = j?.description || "";
+        if (desc.toLowerCase().includes("chat not found")) {
+          msg = "Contact service not configured";
+        } else if (desc) {
+          msg = "Messaging service error";
+        }
+      } catch {
+        // ignore
+      }
+      return NextResponse.json({ ok: false, error: msg }, { status: 502 });
     }
 
     return NextResponse.json({ ok: true });
