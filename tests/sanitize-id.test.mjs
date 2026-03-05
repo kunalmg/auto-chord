@@ -9,8 +9,15 @@ test("sanitizeId accepts clean numeric ids", () => {
 });
 
 test("sanitizeId rejects invalid ids", () => {
-  const bad = ["9a", "9/1", "", " ", undefined, null, "undefined", "NaN", "%0A", "0", "-1"];
+  const bad = ["9/1", "", " ", undefined, null, "undefined", "NaN", "%0A", "0", "-1"];
   for (const v of bad) {
     assert.equal(sanitizeId(v), null);
   }
+});
+
+test("sanitizeId tolerates invisible non-digits around a valid number", () => {
+  // Insert zero width joiner and newline around 9
+  const zwnj = "\u200C";
+  const input = `${zwnj} 9 %0A`;
+  assert.equal(sanitizeId(input), 9);
 });
