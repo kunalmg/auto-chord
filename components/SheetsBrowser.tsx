@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { sanitizeId } from "@/lib/sanitize-id.mjs";
 import { apiFetch } from "@/lib/api";
 
 type Item = {
@@ -156,18 +157,25 @@ export default function SheetsBrowser() {
         </select>
       </div>
       <div className="grid gap-6 md:grid-cols-2">
-        {filtered.map((item) => (
+        {filtered.map((item) => {
+          const validId = sanitizeId(item?.id);
+          const canLink = typeof validId === "number";
+          return (
           <div
             key={item.id}
             className="group rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:translate-y-[-2px] hover:shadow-[0_10px_30px_rgba(0,0,0,0.4)]"
           >
             <div className="flex items-baseline justify-between">
-              <Link
-                href={`/sheets/${item.id}`}
-                className="text-lg font-semibold text-white group-hover:underline"
-              >
-                {item.title}
-              </Link>
+              {canLink ? (
+                <Link
+                  href={`/sheets/${validId}`}
+                  className="text-lg font-semibold text-white group-hover:underline"
+                >
+                  {item.title}
+                </Link>
+              ) : (
+                <span className="text-lg font-semibold text-white/60">{item.title}</span>
+              )}
               <span className="text-xs text-white/50">
                 {new Date(item.updated_at ?? item.created_at).toLocaleDateString()}
               </span>
@@ -177,12 +185,18 @@ export default function SheetsBrowser() {
               {(item.difficulty ?? "Difficulty —")}
             </p>
             <div className="mt-3">
-              <Link
-                href={`/sheets/${item.id}`}
-                className="rounded-full border border-white/20 px-3 py-1 text-xs text-white"
-              >
-                View
-              </Link>
+              {canLink ? (
+                <Link
+                  href={`/sheets/${validId}`}
+                  className="rounded-full border border-white/20 px-3 py-1 text-xs text-white"
+                >
+                  View
+                </Link>
+              ) : (
+                <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/50">
+                  Invalid id
+                </span>
+              )}
               {(me && (me.role === "admin" || me.id === item.owner_id)) ? (
                 <button
                   onClick={() => remove(item.id)}
@@ -194,7 +208,7 @@ export default function SheetsBrowser() {
               ) : null}
             </div>
           </div>
-        ))}
+        )})}
         {filtered.length === 0 ? (
           <div className="text-sm text-white/60">No results</div>
         ) : null}

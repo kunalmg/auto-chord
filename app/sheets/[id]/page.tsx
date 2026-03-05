@@ -5,6 +5,8 @@ import SectionHeading from "@/components/SectionHeading";
 import { CHORDS, detectChords } from "@/lib/chords";
 import { apiFetch } from "@/lib/api";
 import ChordDiagram from "@/components/ChordDiagram";
+import { sanitizeId } from "@/lib/sanitize-id.mjs";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Sheet",
@@ -66,7 +68,16 @@ function Pill({ children }: { children: React.ReactNode }) {
 }
 
 export default async function SheetPage({ params }: { params: { id: string } }) {
-  const res = await getSheet(params.id);
+  const raw = params.id;
+  const idNum = sanitizeId(raw);
+  if (process.env.NODE_ENV !== "production") {
+    // minimal diagnostics
+    console.log("[sheet] raw id:", raw, "sanitized:", idNum);
+  }
+  if (idNum == null) {
+    notFound();
+  }
+  const res = await getSheet(String(idNum));
   if (!res.ok || !res.data) {
     return (
       <section className="py-20">

@@ -149,8 +149,24 @@ app.get("/api/songs/:id", async (req, res) => {
     res.status(503).json({ ok: false, error: "Database not configured" });
     return;
   }
-  const id = Number(req.params.id);
-  if (!Number.isInteger(id)) {
+  function safeDecode(v) {
+    try {
+      return decodeURIComponent(String(v ?? ""));
+    } catch {
+      return String(v ?? "");
+    }
+  }
+  const raw = String(req.params.id ?? "");
+  const cleaned = safeDecode(raw).trim();
+  if (!/^\d+$/.test(cleaned)) {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[backend /api/songs/:id] raw:", raw, "cleaned:", cleaned, "-> invalid");
+    }
+    res.status(400).json({ ok: false, error: "Invalid id" });
+    return;
+  }
+  const id = Number(cleaned);
+  if (!Number.isSafeInteger(id) || id <= 0) {
     res.status(400).json({ ok: false, error: "Invalid id" });
     return;
   }
