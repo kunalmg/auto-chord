@@ -3,9 +3,8 @@ export async function apiFetch<T>(
   options?: RequestInit
 ): Promise<{ ok: boolean; data?: T; error?: string }> {
   const bases = [
-    process.env.NEXT_PUBLIC_API_BASE_URL,
     process.env.NEXT_PUBLIC_BACKEND_URL,
-    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.NEXT_PUBLIC_API_BASE_URL,
     "http://localhost:4000",
   ].filter(Boolean) as string[];
   let lastError: string | undefined;
