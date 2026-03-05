@@ -38,6 +38,18 @@ type Sheet = {
 };
 
 async function getSheet(id: string) {
+  const base = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (base) {
+    try {
+      const res = await fetch(`${base}/api/songs/${id}`, { cache: "no-store" });
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; data?: Sheet; error?: string } | null;
+      if (data && typeof data.ok === "boolean") {
+        return data as { ok: boolean; data?: Sheet; error?: string };
+      }
+    } catch {
+      // fall through to apiFetch
+    }
+  }
   const result = await apiFetch<Sheet>(`/api/songs/${id}`, { cache: "no-store" } as RequestInit);
   return result;
 }
